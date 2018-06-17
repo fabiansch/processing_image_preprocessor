@@ -1,3 +1,4 @@
 Rails.application.routes.draw do
-  # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
+  resource :process_image, only: :create
+  get '/_health', to: 'healths#show'
 end

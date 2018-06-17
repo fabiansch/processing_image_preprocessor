@@ -1,24 +1,14 @@
-# README
+## setup
+```
+docker build -t image_processor .
+```
+```
+docker run -p 3000:3000 -v $(pwd)/app:/app image_processor
+```
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+## API
 
-Things you may want to cover:
+post /process_image
+input: ``{'base64': [MIMETYPE;base64,]IMAGE_BASE64_DATA_STRING, 'frame_rate': int}``
+output: ``{'base64': 'IMAGE_PNG_BASE64_STRING"}``
 
-* Ruby version
-
-* System dependencies
-
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...

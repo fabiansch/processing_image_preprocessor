@@ -1,0 +1,40 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    service: image-processor
+  name: image-processor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      service: image-processor
+  template:
+    metadata:
+      labels:
+        service: image-processor
+    spec:
+      containers:
+      - image: fabianhh/image-processor
+        name: image-processor
+        ports:
+        - containerPort: 3000
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /_health
+            port: 3000
+          initialDelaySeconds: 15
+          timeoutSeconds: 1
+        readinessProbe:
+          httpGet:
+            path: /_health
+            port: 3000
+          initialDelaySeconds: 15
+          timeoutSeconds: 1
+        env:
+        - name: SECRET_KEY_BASE
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: secret_key_base
