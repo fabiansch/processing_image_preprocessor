@@ -3,3 +3,4 @@ Gemfile.lock
 .dockerignore
 log
 tmp
+!tmp/images/.keep
