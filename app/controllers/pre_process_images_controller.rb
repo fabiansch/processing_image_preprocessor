@@ -33,21 +33,12 @@ class PreProcessImagesController < ApplicationController
 
     begin_postprocessing = Time.now
 
-    #TODO extract request to private method
-    file_content = open(converted_path) { |f| f.read }
-    payload = {"base64": Base64.strict_encode64(file_content)}
+    payload = build_payload converted_path
+    response = send_post_request(params['image_processor_url'], payload)
 
-    #TODO needs to be set during startup
-    uri = URI.parse("http://host.docker.internal:3000/process_image")
-    header = {'Content-Type': 'application/json'}
-    # Create the HTTP objects
-    http = Net::HTTP.new(uri.host, uri.port)
-    request = Net::HTTP::Post.new(uri.request_uri, header)
-    request.body = payload.to_json
-
-    response = http.request(request)
-    render json: response.body
     puts "postprocessing with networkdelay time: " + (Time.now - begin_postprocessing).to_s
+
+    render json: response.body
   end
 
   private
@@ -58,5 +49,20 @@ class PreProcessImagesController < ApplicationController
       else
         data
       end
+    end
+
+    def build_payload image_path
+      file_content = open(image_path) { |f| f.read }
+      payload = {"base64": Base64.strict_encode64(file_content)}
+    end
+
+    def send_post_request uri_string, payload
+      uri = URI.parse(uri_string)
+      uri.host = "host.docker.internal" if uri.host == 'localhost'
+      header = {'Content-Type': 'application/json'}
+      http = Net::HTTP.new(uri.host, uri.port)
+      request = Net::HTTP::Post.new(uri.request_uri, header)
+      request.body = payload.to_json
+      http.request(request)
     end
 end
