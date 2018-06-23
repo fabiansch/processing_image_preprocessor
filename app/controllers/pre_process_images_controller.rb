@@ -53,7 +53,8 @@ class PreProcessImagesController < ApplicationController
 
     def build_payload image_path
       file_content = open(image_path) { |f| f.read }
-      payload = {"base64": Base64.strict_encode64(file_content)}
+      payload = { "base64": Base64.strict_encode64(file_content),
+                  "minimum_process_time": params['minimum_process_time'] }
     end
 
     def send_post_request uri_string, payload
