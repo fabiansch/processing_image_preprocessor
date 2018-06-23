@@ -16,35 +16,25 @@ class PreProcessImagesController < ApplicationController
 
     thread_id = Thread.current.object_id
 
-
-    #TODO clean up
-    compared_path = "tmp/images/compared-#{thread_id.to_s}.png"
+    compared_path = "tmp/images/diff-highlighted-orig-lowlighted-black-thread-#{thread_id.to_s}.png"
     compare = MiniMagick::Tool::Compare.new
-    compare << "-compose" << "src" << "-highlight-color" << "#AAAAAA" << "-lowlight-color" << "White" << "-background" << "White" << "-transparent-color"<< "White" << image.path << image_old.path << compared_path
+    compare << "-highlight-color" << "#fff0" << "-lowlight-color" << "#000" << image.path << image_old.path << compared_path
     begin
       compare.call
     rescue
     end
 
-
-    transparent_highlighted = MiniMagick::Image.open(compared_path)
-    transparent_highlighted.transparent "#AAAAAA"
-
-    composited_path = "tmp/images/composited-#{thread_id}.png"
-    composite = MiniMagick::Tool::Composite.new
-    composite << "-alpha" << "on" << transparent_highlighted.path << image.path << composited_path
-    composite.call
-
-    transparent_lowlighted = MiniMagick::Image.open(composited_path)
-    transparent_lowlighted.transparent "White"
+    converted_path = "tmp/images/diff-highlighted-orig-lowlighted-transparent-thread-#{thread_id.to_s}.png"
+    convert = MiniMagick::Tool::Convert.new
+    convert << "-transparent" << "#000" << compared_path << converted_path
+    convert.call
 
     puts "preprocessing time: " + (Time.now - begin_preprocessing).to_s
-
 
     begin_postprocessing = Time.now
 
     #TODO extract request to private method
-    file_content = open(transparent_lowlighted.path) { |f| f.read }
+    file_content = open(converted_path) { |f| f.read }
     payload = {"base64": Base64.strict_encode64(file_content)}
 
     #TODO needs to be set during startup
